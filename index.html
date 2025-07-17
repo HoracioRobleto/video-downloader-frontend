@@ -3,10 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Downloader</title>
+    <title>Portapapeles Móvil ↔ PC</title>
+
+    <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2563eb">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Clipboard">
+
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180x180.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
+
+    <!-- Meta tags for better SEO and sharing -->
+    <meta name="description" content="Comparte texto fácilmente entre dispositivos móviles y PC">
+    <meta name="keywords" content="portapapeles, clipboard, compartir texto, sync">
+    <meta name="author" content="Tu Nombre">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Portapapeles Compartido">
+    <meta property="og:description" content="Comparte texto fácilmente entre dispositivos móviles y PC">
+    <meta property="og:image" content="icons/icon-512x512.png">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Portapapeles Compartido">
+    <meta name="twitter:description" content="Comparte texto fácilmente entre dispositivos móviles y PC">
     <style>
         * {
             margin: 0;
@@ -15,414 +43,606 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             padding: 20px;
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 600px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         h1 {
             text-align: center;
-            margin-bottom: 2rem;
-            color: #1f2937;
-            font-size: 1.8rem;
-            font-weight: 600;
-        }
-
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-
-        input[type="url"] {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        input[type="url"]:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .quality-select {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 1rem;
-            background: white;
-            margin-bottom: 1.5rem;
-            cursor: pointer;
-        }
-
-        .download-btn {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-        }
-
-        .download-btn:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #ffffff40;
-            border-top: 2px solid #ffffff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
         }
 
         .status {
-            margin-top: 1rem;
-            padding: 0.75rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
             text-align: center;
+            font-weight: bold;
             transition: all 0.3s ease;
         }
 
         .status.success {
-            background: #dcfce7;
-            color: #166534;
-            border: 1px solid #bbf7d0;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
         .status.error {
-            background: #fee2e2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         .status.info {
-            background: #dbeafe;
-            color: #1d4ed8;
-            border: 1px solid #bfdbfe;
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
         }
 
-        .progress-bar {
+        .status.hidden {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        #clip {
             width: 100%;
-            height: 6px;
-            background: #e5e7eb;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 1rem;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
         }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #2563eb, #1d4ed8);
-            border-radius: 3px;
-            transition: width 0.3s ease;
-            width: 0%;
+        #clip:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .save-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .save-btn:hover:not(:disabled) {
+            background: #218838;
+        }
+
+        .load-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .load-btn:hover:not(:disabled) {
+            background: #0056b3;
+        }
+
+        .clear-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .clear-btn:hover:not(:disabled) {
+            background: #c82333;
+        }
+
+        .copy-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .copy-btn:hover:not(:disabled) {
+            background: #545b62;
+        }
+
+        .char-count {
+            text-align: right;
+            margin-top: 10px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
 
         .install-prompt {
             position: fixed;
             bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: #1f2937;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #007bff;
             color: white;
-            padding: 1rem;
-            border-radius: 12px;
+            padding: 15px 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             display: none;
             align-items: center;
-            justify-content: space-between;
+            gap: 10px;
             z-index: 1000;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
         }
 
-        .install-btn {
-            background: #2563eb;
+        .install-prompt.show {
+            display: flex;
+        }
+
+        .install-prompt button {
+            background: white;
+            color: #007bff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .install-prompt .close-btn {
+            background: transparent;
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
+            font-size: 20px;
             cursor: pointer;
-            font-weight: 500;
+            padding: 0;
+            margin-left: 10px;
         }
 
-        .close-btn {
-            background: none;
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .offline-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .offline-indicator.show {
+            display: block;
+        }
+
+        .update-available {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .update-available.show {
+            display: flex;
+        }
+
+        .update-available button {
+            background: white;
+            color: #28a745;
             border: none;
-            color: #9ca3af;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 12px;
             cursor: pointer;
-            font-size: 1.2rem;
-            margin-left: 1rem;
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
             .container {
-                padding: 1.5rem;
-                margin: 10px;
+                padding: 20px;
             }
 
             h1 {
-                font-size: 1.5rem;
+                font-size: 1.5em;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📱 Video Downloader</h1>
+        <h1>📋 Portapapeles Compartido</h1>
 
-        <form id="downloadForm">
-            <div class="input-group">
-                <input
-                    type="url"
-                    id="urlInput"
-                    placeholder="Pega el enlace del video aquí..."
-                    required
-                >
-            </div>
-
-            <select class="quality-select" id="qualitySelect">
-                <option value="best">Mejor calidad disponible</option>
-                <option value="worst">Menor calidad (más rápido)</option>
-                <option value="bestvideo+bestaudio">Mejor video + audio</option>
-                <option value="720p">720p (HD)</option>
-                <option value="480p">480p (SD)</option>
-            </select>
-
-            <button type="submit" class="download-btn" id="downloadBtn">
-                <span id="btnText">🎬 Descargar Video</span>
-                <div class="spinner" id="spinner" style="display: none;"></div>
-            </button>
-        </form>
-
-        <div class="progress-bar" id="progressBar" style="display: none;">
-            <div class="progress-fill" id="progressFill"></div>
+        <!-- Indicadores de estado -->
+        <div id="offline-indicator" class="offline-indicator">
+            📡 Sin conexión
         </div>
 
-        <div id="status" class="status" style="display: none;"></div>
+        <div id="update-available" class="update-available">
+            <span>📱 Actualización disponible</span>
+            <button onclick="updateApp()">Actualizar</button>
+        </div>
+
+        <div id="status" class="status hidden">
+            <span id="status-text"></span>
+        </div>
+
+        <textarea
+            id="clip"
+            placeholder="Escribe o pega aquí tu texto..."
+            maxlength="10000"
+        ></textarea>
+
+        <div class="char-count">
+            <span id="char-count">0</span> / 10,000 caracteres
+        </div>
+
+        <div class="button-group">
+            <button class="save-btn" onclick="save()">
+                <span id="save-text">💾 Guardar</span>
+            </button>
+            <button class="load-btn" onclick="load()">
+                <span id="load-text">📥 Cargar</span>
+            </button>
+            <button class="copy-btn" onclick="copyToClipboard()">
+                📋 Copiar
+            </button>
+            <button class="clear-btn" onclick="clearText()">
+                🗑️ Limpiar
+            </button>
+        </div>
     </div>
 
-    <div class="install-prompt" id="installPrompt">
-        <div>
-            <strong>📱 Instalar App</strong>
-            <p>Agrega esta app a tu pantalla de inicio</p>
-        </div>
-        <div>
-            <button class="install-btn" id="installBtn">Instalar</button>
-            <button class="close-btn" id="closeBtn">×</button>
-        </div>
+    <!-- PWA Install Prompt -->
+    <div id="install-prompt" class="install-prompt">
+        <span>📱 Instalar como aplicación</span>
+        <button onclick="installApp()">Instalar</button>
+        <button class="close-btn" onclick="closeInstallPrompt()">×</button>
     </div>
 
     <script>
-        // Configuración del backend
-        const API_BASE_URL = 'https://video-downloader-api-kde9.onrender.com'; // Cambia esto por tu URL de Render
+        // Configuración de la API
+        const API_URL = 'https://tu-app-backend.onrender.com';
 
-        // Elementos del DOM
-        const form = document.getElementById('downloadForm');
-        const urlInput = document.getElementById('urlInput');
-        const qualitySelect = document.getElementById('qualitySelect');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const btnText = document.getElementById('btnText');
-        const spinner = document.getElementById('spinner');
-        const status = document.getElementById('status');
-        const progressBar = document.getElementById('progressBar');
-        const progressFill = document.getElementById('progressFill');
-
-        // PWA Install
+        // PWA Variables
         let deferredPrompt;
-        const installPrompt = document.getElementById('installPrompt');
-        const installBtn = document.getElementById('installBtn');
-        const closeBtn = document.getElementById('closeBtn');
+        let isAppInstalled = false;
 
-        // Service Worker
+        // Referencias a elementos del DOM
+        const clipTextarea = document.getElementById('clip');
+        const statusDiv = document.getElementById('status');
+        const statusText = document.getElementById('status-text');
+        const charCount = document.getElementById('char-count');
+        const saveText = document.getElementById('save-text');
+        const loadText = document.getElementById('load-text');
+        const installPrompt = document.getElementById('install-prompt');
+        const offlineIndicator = document.getElementById('offline-indicator');
+        const updateAvailable = document.getElementById('update-available');
+
+        // Registrar Service Worker
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => console.log('SW registered'))
-                    .catch(error => console.log('SW registration failed'));
-            });
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('Service Worker registrado:', registration);
+
+                    // Verificar actualizaciones
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                updateAvailable.classList.add('show');
+                            }
+                        });
+                    });
+                })
+                .catch(error => console.log('Error registrando SW:', error));
         }
 
-        // PWA Install Prompt
+        // Detectar modo offline/online
+        window.addEventListener('online', () => {
+            offlineIndicator.classList.remove('show');
+            showStatus('🌐 Conexión restaurada', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            offlineIndicator.classList.add('show');
+            showStatus('📡 Sin conexión - Modo offline', 'error');
+        });
+
+        // Detectar instalación de PWA
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installPrompt.style.display = 'flex';
+
+            // Mostrar prompt de instalación después de 10 segundos
+            setTimeout(() => {
+                if (!isAppInstalled) {
+                    installPrompt.classList.add('show');
+                }
+            }, 10000);
         });
 
-        installBtn.addEventListener('click', () => {
+        // Detectar cuando la app se instala
+        window.addEventListener('appinstalled', () => {
+            isAppInstalled = true;
+            installPrompt.classList.remove('show');
+            showStatus('✅ App instalada exitosamente', 'success');
+        });
+
+        // Función para instalar la app
+        function installApp() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(choice => {
-                    if (choice.outcome === 'accepted') {
-                        console.log('User accepted the install prompt');
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Usuario aceptó instalar');
                     }
                     deferredPrompt = null;
-                    installPrompt.style.display = 'none';
+                    installPrompt.classList.remove('show');
                 });
             }
+        }
+
+        // Cerrar prompt de instalación
+        function closeInstallPrompt() {
+            installPrompt.classList.remove('show');
+        }
+
+        // Actualizar la app
+        function updateApp() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(registration => {
+                    if (registration && registration.waiting) {
+                        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                        window.location.reload();
+                    }
+                });
+            }
+        }
+
+        // Manejar parámetros URL para shortcuts
+        const urlParams = new URLSearchParams(window.location.search);
+        const action = urlParams.get('action');
+
+        if (action === 'new') {
+            clipTextarea.value = '';
+            clipTextarea.focus();
+        } else if (action === 'load') {
+            load();
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCharCount();
+            load(); // Cargar datos automáticamente al iniciar
         });
 
-        closeBtn.addEventListener('click', () => {
-            installPrompt.style.display = 'none';
-        });
+        // Actualizar contador de caracteres
+        clipTextarea.addEventListener('input', updateCharCount);
 
-        // Función para mostrar status
+        function updateCharCount() {
+            const count = clipTextarea.value.length;
+            charCount.textContent = count;
+
+            if (count > 9000) {
+                charCount.style.color = '#dc3545';
+            } else if (count > 7000) {
+                charCount.style.color = '#ffc107';
+            } else {
+                charCount.style.color = '#666';
+            }
+        }
+
+        // Mostrar estado
         function showStatus(message, type = 'info') {
-            status.textContent = message;
-            status.className = `status ${type}`;
-            status.style.display = 'block';
+            statusText.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.classList.remove('hidden');
 
-            if (type === 'success' || type === 'error') {
-                setTimeout(() => {
-                    status.style.display = 'none';
-                }, 5000);
-            }
+            setTimeout(() => {
+                statusDiv.classList.add('hidden');
+            }, 3000);
         }
 
-        // Función para actualizar progreso
-        function updateProgress(percent) {
-            progressBar.style.display = 'block';
-            progressFill.style.width = `${percent}%`;
+        // Guardar texto
+        async function save() {
+            const text = clipTextarea.value.trim();
 
-            if (percent >= 100) {
-                setTimeout(() => {
-                    progressBar.style.display = 'none';
-                    progressFill.style.width = '0%';
-                }, 2000);
+            if (!text) {
+                showStatus('No hay texto para guardar', 'error');
+                return;
             }
-        }
 
-        // Función para descargar video
-        async function downloadVideo(url, quality) {
+            const saveButton = document.querySelector('.save-btn');
+            saveButton.disabled = true;
+            saveText.innerHTML = '<span class="loading"></span>Guardando...';
+
             try {
-                showStatus('Iniciando descarga...', 'info');
-
-                // Simular progreso (en una implementación real, esto vendría del backend)
-                let progress = 0;
-                const progressInterval = setInterval(() => {
-                    progress += Math.random() * 15;
-                    if (progress > 90) progress = 90;
-                    updateProgress(progress);
-                }, 500);
-
-                const response = await fetch(`${API_BASE_URL}/download`, {
+                const response = await fetch(`${API_URL}/clipboard`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        url: url,
-                        quality: quality
-                    })
+                    body: JSON.stringify({ text: text })
                 });
 
-                clearInterval(progressInterval);
-                updateProgress(100);
-
                 if (!response.ok) {
-                    throw new Error('Error en la descarga');
+                    throw new Error(`Error del servidor: ${response.status}`);
                 }
 
-                const blob = await response.blob();
-                const downloadUrl = window.URL.createObjectURL(blob);
-
-                // Crear enlace de descarga
-                const a = document.createElement('a');
-                a.href = downloadUrl;
-                a.download = `video_${Date.now()}.mp4`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(downloadUrl);
-
-                showStatus('¡Descarga completada!', 'success');
+                const data = await response.json();
+                showStatus('✅ Texto guardado exitosamente', 'success');
 
             } catch (error) {
-                console.error('Error:', error);
-                showStatus('Error al descargar el video. Verifica el enlace.', 'error');
+                console.error('Error al guardar:', error);
+                showStatus('❌ Error al guardar el texto', 'error');
+            } finally {
+                saveButton.disabled = false;
+                saveText.innerHTML = '💾 Guardar';
             }
         }
 
-        // Manejar envío del formulario
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Cargar texto
+        async function load() {
+            const loadButton = document.querySelector('.load-btn');
+            loadButton.disabled = true;
+            loadText.innerHTML = '<span class="loading"></span>Cargando...';
 
-            const url = urlInput.value.trim();
-            const quality = qualitySelect.value;
+            try {
+                const response = await fetch(`${API_URL}/clipboard`);
 
-            if (!url) {
-                showStatus('Por favor, ingresa un enlace válido', 'error');
+                if (!response.ok) {
+                    throw new Error(`Error del servidor: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.text) {
+                    clipTextarea.value = data.text;
+                    updateCharCount();
+                    showStatus('📥 Texto cargado exitosamente', 'success');
+                } else {
+                    showStatus('No hay texto guardado', 'info');
+                }
+
+            } catch (error) {
+                console.error('Error al cargar:', error);
+                showStatus('❌ Error al cargar el texto', 'error');
+            } finally {
+                loadButton.disabled = false;
+                loadText.innerHTML = '📥 Cargar';
+            }
+        }
+
+        // Copiar al portapapeles del navegador
+        async function copyToClipboard() {
+            const text = clipTextarea.value;
+
+            if (!text) {
+                showStatus('No hay texto para copiar', 'error');
                 return;
             }
 
-            // Deshabilitar botón
-            downloadBtn.disabled = true;
-            btnText.textContent = 'Descargando...';
-            spinner.style.display = 'block';
-
             try {
-                await downloadVideo(url, quality);
-            } finally {
-                // Habilitar botón
-                downloadBtn.disabled = false;
-                btnText.textContent = '🎬 Descargar Video';
-                spinner.style.display = 'none';
+                await navigator.clipboard.writeText(text);
+                showStatus('📋 Texto copiado al portapapeles', 'success');
+            } catch (error) {
+                console.error('Error al copiar:', error);
+                showStatus('❌ Error al copiar al portapapeles', 'error');
+            }
+        }
+
+        // Limpiar texto
+        function clearText() {
+            if (clipTextarea.value && !confirm('¿Estás seguro de que quieres limpiar el texto?')) {
+                return;
+            }
+
+            clipTextarea.value = '';
+            updateCharCount();
+            showStatus('🗑️ Texto limpiado', 'info');
+        }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 's':
+                        e.preventDefault();
+                        save();
+                        break;
+                    case 'l':
+                        e.preventDefault();
+                        load();
+                        break;
+                }
             }
         });
 
-        // Detectar si ya está instalado
-        window.addEventListener('appinstalled', () => {
-            installPrompt.style.display = 'none';
-            console.log('PWA was installed');
-        });
-
-        // Manejar orientación
-        window.addEventListener('orientationchange', () => {
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-            }, 100);
+        // Auto-guardar (opcional)
+        let autoSaveTimeout;
+        clipTextarea.addEventListener('input', function() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                if (clipTextarea.value.trim()) {
+                    save();
+                }
+            }, 5000); // Auto-guardar después de 5 segundos de inactividad
         });
     </script>
 </body>
