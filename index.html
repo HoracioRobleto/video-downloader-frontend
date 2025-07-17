@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Downloader</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #1f2937;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="url"] {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .quality-select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: white;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+        }
+
+        .download-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .download-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff40;
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .status.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .status.info {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #1d4ed8);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: #1f2937;
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .install-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-left: 1rem;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Video Downloader</h1>
+
+        <form id="downloadForm">
+            <div class="input-group">
+                <input
+                    type="url"
+                    id="urlInput"
+                    placeholder="Pega el enlace del video aquí..."
+                    required
+                >
+            </div>
+
+            <select class="quality-select" id="qualitySelect">
+                <option value="best">Mejor calidad disponible</option>
+                <option value="worst">Menor calidad (más rápido)</option>
+                <option value="bestvideo+bestaudio">Mejor video + audio</option>
+                <option value="720p">720p (HD)</option>
+                <option value="480p">480p (SD)</option>
+            </select>
+
+            <button type="submit" class="download-btn" id="downloadBtn">
+                <span id="btnText">🎬 Descargar Video</span>
+                <div class="spinner" id="spinner" style="display: none;"></div>
+            </button>
+        </form>
+
+        <div class="progress-bar" id="progressBar" style="display: none;">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <div class="install-prompt" id="installPrompt">
+        <div>
+            <strong>📱 Instalar App</strong>
+            <p>Agrega esta app a tu pantalla de inicio</p>
+        </div>
+        <div>
+            <button class="install-btn" id="installBtn">Instalar</button>
+            <button class="close-btn" id="closeBtn">×</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuración del backend
+        const API_BASE_URL = 'https://video-downloader-api-kde9.onrender.comcd  c'; // Cambia esto por tu URL de Render
+
+        // Elementos del DOM
+        const form = document.getElementById('downloadForm');
+        const urlInput = document.getElementById('urlInput');
+        const qualitySelect = document.getElementById('qualitySelect');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const btnText = document.getElementById('btnText');
+        const spinner = document.getElementById('spinner');
+        const status = document.getElementById('status');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+
+        // PWA Install
+        let deferredPrompt;
+        const installPrompt = document.getElementById('installPrompt');
+        const installBtn = document.getElementById('installBtn');
+        const closeBtn = document.getElementById('closeBtn');
+
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
+            });
+        }
+
+        // PWA Install Prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installPrompt.style.display = 'flex';
+        });
+
+        installBtn.addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(choice => {
+                    if (choice.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    }
+                    deferredPrompt = null;
+                    installPrompt.style.display = 'none';
+                });
+            }
+        });
+
+        closeBtn.addEventListener('click', () => {
+            installPrompt.style.display = 'none';
+        });
+
+        // Función para mostrar status
+        function showStatus(message, type = 'info') {
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Función para actualizar progreso
+        function updateProgress(percent) {
+            progressBar.style.display = 'block';
+            progressFill.style.width = `${percent}%`;
+
+            if (percent >= 100) {
+                setTimeout(() => {
+                    progressBar.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }, 2000);
+            }
+        }
+
+        // Función para descargar video
+        async function downloadVideo(url, quality) {
+            try {
+                showStatus('Iniciando descarga...', 'info');
+
+                // Simular progreso (en una implementación real, esto vendría del backend)
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += Math.random() * 15;
+                    if (progress > 90) progress = 90;
+                    updateProgress(progress);
+                }, 500);
+
+                const response = await fetch(`${API_BASE_URL}/download`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        url: url,
+                        quality: quality
+                    })
+                });
+
+                clearInterval(progressInterval);
+                updateProgress(100);
+
+                if (!response.ok) {
+                    throw new Error('Error en la descarga');
+                }
+
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+
+                // Crear enlace de descarga
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `video_${Date.now()}.mp4`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(downloadUrl);
+
+                showStatus('¡Descarga completada!', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus('Error al descargar el video. Verifica el enlace.', 'error');
+            }
+        }
+
+        // Manejar envío del formulario
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const url = urlInput.value.trim();
+            const quality = qualitySelect.value;
+
+            if (!url) {
+                showStatus('Por favor, ingresa un enlace válido', 'error');
+                return;
+            }
+
+            // Deshabilitar botón
+            downloadBtn.disabled = true;
+            btnText.textContent = 'Descargando...';
+            spinner.style.display = 'block';
+
+            try {
+                await downloadVideo(url, quality);
+            } finally {
+                // Habilitar botón
+                downloadBtn.disabled = false;
+                btnText.textContent = '🎬 Descargar Video';
+                spinner.style.display = 'none';
+            }
+        });
+
+        // Detectar si ya está instalado
+        window.addEventListener('appinstalled', () => {
+            installPrompt.style.display = 'none';
+            console.log('PWA was installed');
+        });
+
+        // Manejar orientación
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 100);
+        });
+    </script>
+</body>
+</html>
