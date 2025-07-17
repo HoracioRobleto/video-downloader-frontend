@@ -8,7 +8,7 @@
     <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#667eea">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Clipboard">
 
@@ -424,18 +424,31 @@
             showStatus('📡 Sin conexión - Modo offline', 'error');
         });
 
-        // Detectar instalación de PWA
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevenir que aparezca el mini-infobar automático
+  e.preventDefault();
+  // Guardar el evento para uso posterior
+  deferredPrompt = e;
+  // Mostrar tu botón de instalación personalizado
+  mostrarBotonInstalar();
+});
 
-            // Mostrar prompt de instalación después de 10 segundos
-            setTimeout(() => {
-                if (!isAppInstalled) {
-                    installPrompt.classList.add('show');
-                }
-            }, 10000);
-        });
+function mostrarBotonInstalar() {
+  const botonInstalar = document.getElementById('boton-instalar');
+  botonInstalar.style.display = 'block';
+
+  botonInstalar.addEventListener('click', () => {
+    // Mostrar el prompt de instalación
+    deferredPrompt.prompt();
+
+    deferredPrompt.userChoice.then((resultado) => {
+      if (resultado.outcome === 'accepted') {
+        console.log('Usuario aceptó la instalación');
+      }
+      deferredPrompt = null;
+    });
+  });
+}
 
         // Detectar cuando la app se instala
         window.addEventListener('appinstalled', () => {
