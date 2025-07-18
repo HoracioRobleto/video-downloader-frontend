@@ -206,6 +206,10 @@
             margin-right: 10px;
         }
 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
         .install-prompt {
             position: fixed;
@@ -394,23 +398,34 @@
         const offlineIndicator = document.getElementById('offline-indicator');
         const updateAvailable = document.getElementById('update-available');
 
-        // Registrar Service Worker
+        // Registrar Service Worker (solo si existe)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(registration => {
-                    console.log('Service Worker registrado:', registration);
-
-                    // Verificar actualizaciones
-                    registration.addEventListener('updatefound', () => {
-                        const newWorker = registration.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                updateAvailable.classList.add('show');
-                            }
-                        });
-                    });
+            // Verificar si el archivo sw.js existe antes de registrarlo
+            fetch('./sw.js', { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        return navigator.serviceWorker.register('./sw.js');
+                    } else {
+                        console.log('Service Worker no encontrado, funcionando sin cache offline');
+                        return null;
+                    }
                 })
-                .catch(error => console.log('Error registrando SW:', error));
+                .then(registration => {
+                    if (registration) {
+                        console.log('Service Worker registrado:', registration);
+
+                        // Verificar actualizaciones
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    updateAvailable.classList.add('show');
+                                }
+                            });
+                        });
+                    }
+                })
+                .catch(error => console.log('Error con Service Worker:', error));
         }
 
         // Detectar modo offline/online
@@ -424,37 +439,35 @@
             showStatus('📡 Sin conexión - Modo offline', 'error');
         });
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  // Prevenir que aparezca el mini-infobar automático
-  e.preventDefault();
-  // Guardar el evento para uso posterior
-  deferredPrompt = e;
-  // Mostrar tu botón de instalación personalizado
-  mostrarBotonInstalar();
-});
+        // Manejar evento de instalación PWA
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('beforeinstallprompt event fired');
+            // Prevenir que aparezca el mini-infobar automático
+            e.preventDefault();
+            // Guardar el evento para uso posterior
+            deferredPrompt = e;
+            // Mostrar el prompt de instalación personalizado
+            mostrarPromptInstalacion();
+        });
 
-function mostrarBotonInstalar() {
-  const botonInstalar = document.getElementById('boton-instalar');
-  botonInstalar.style.display = 'block';
+        function mostrarPromptInstalacion() {
+            // Mostrar nuestro prompt personalizado
+            installPrompt.classList.add('show');
 
-  botonInstalar.addEventListener('click', () => {
-    // Mostrar el prompt de instalación
-    deferredPrompt.prompt();
-
-    deferredPrompt.userChoice.then((resultado) => {
-      if (resultado.outcome === 'accepted') {
-        console.log('Usuario aceptó la instalación');
-      }
-      deferredPrompt = null;
-    });
-  });
-}
+            // Opcional: ocultar automáticamente después de 10 segundos
+            setTimeout(() => {
+                if (installPrompt.classList.contains('show')) {
+                    installPrompt.classList.remove('show');
+                }
+            }, 10000);
+        }
 
         // Detectar cuando la app se instala
         window.addEventListener('appinstalled', () => {
             isAppInstalled = true;
             installPrompt.classList.remove('show');
             showStatus('✅ App instalada exitosamente', 'success');
+            deferredPrompt = null;
         });
 
         // Función para instalar la app
@@ -464,10 +477,16 @@ function mostrarBotonInstalar() {
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
                         console.log('Usuario aceptó instalar');
+                        showStatus('⏳ Instalando aplicación...', 'info');
+                    } else {
+                        console.log('Usuario rechazó instalar');
                     }
                     deferredPrompt = null;
                     installPrompt.classList.remove('show');
                 });
+            } else {
+                showStatus('⚠️ No se puede instalar en este momento', 'error');
+                installPrompt.classList.remove('show');
             }
         }
 
@@ -496,13 +515,15 @@ function mostrarBotonInstalar() {
             clipTextarea.value = '';
             clipTextarea.focus();
         } else if (action === 'load') {
-            load();
+            setTimeout(() => load(), 100); // Pequeño delay para asegurar que todo esté cargado
         }
 
         // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
             updateCharCount();
-            load(); // Cargar datos automáticamente al iniciar
+            if (action !== 'new') {
+                load(); // Cargar datos automáticamente al iniciar (excepto si es una nueva nota)
+            }
         });
 
         // Actualizar contador de caracteres
@@ -657,6 +678,14 @@ function mostrarBotonInstalar() {
                 }
             }, 5000); // Auto-guardar después de 5 segundos de inactividad
         });
+
+        // Mostrar información de PWA si no se puede instalar
+        setTimeout(() => {
+            if (!deferredPrompt && !isAppInstalled) {
+                // La app ya está instalada o no se puede instalar
+                console.log('PWA ya instalada o no disponible para instalación');
+            }
+        }, 3000);
     </script>
 </body>
 </html>
